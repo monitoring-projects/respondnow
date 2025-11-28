@@ -16,6 +16,8 @@ slack:
   botToken: ${SLACK_BOT_TOKEN:botToken}
   appToken: ${SLACK_APP_TOKEN:appToken}
   incidentChannelID: ${SLACK_INCIDENT_CHANNEL_ID:slackIncidentChannelId}
+  enabled: ${SLACK_ENABLED:false}
+
 management:
   endpoints:
     web:
