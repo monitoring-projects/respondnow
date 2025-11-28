@@ -1,12 +1,264 @@
-- HTTP(S) mode support for RespondNow slack app
-- Support for attachment objects/artifacts in an Incident
-- Ability to extend RespondNow for Incident types, Severity levels, Incident statuses
-- Support for user-defined Roles for team members participating in incident response
-- OOTB (out-of-the-box) Runbooks for Incident Lifecycle Events
-- Support for Organizations and Teaming
-- Validation support for Incident CRUD ops
-- Timelines in Slack for Incident Updates
-- Reminder/notification functionality for open incidents
-- History/context support in Incident Update Modals
-- Slack thread support in Incident Channel for comment additions & other updates
-- Integration support for Zoom
+# RespondNow - Incident Management Solution Roadmap
+
+## 🎯 Vision
+A comprehensive, multi-tenant, multi-user, multi-source incident management platform that integrates with alerting systems, collaboration tools, and monitoring infrastructure to provide end-to-end incident lifecycle management.
+
+---
+
+## ✅ Completed Features
+
+### Core Incident Management
+- [x] Multi-source incident creation (Slack, Web UI, REST API)
+- [x] Source tracking and audit trails
+- [x] Incident types (Availability, Latency, Security, Other)
+- [x] Severity levels (SEV0, SEV1, SEV2)
+- [x] Status workflow (Started → Acknowledged → Investigating → Identified → Mitigated → Resolved)
+- [x] Incident CRUD operations with validation
+- [x] External incident URL linking
+- [x] Incident deletion (soft delete) with audit trail
+- [x] Incident acknowledgement tracking
+- [x] Tags support for categorization
+
+### Timeline & Activity Tracking
+- [x] Comprehensive timeline tracking for all incident actions
+- [x] Timeline events for: creation, updates, status changes, severity changes, role assignments, deletions, acknowledgements
+- [x] User attribution for all timeline events
+- [x] Source-aware timeline entries (Slack, Web, API)
+
+### Export & Reporting
+- [x] CSV export with filtering and multi-select
+- [x] PDF export for individual incidents
+- [x] Bulk export for multiple incidents
+- [x] Backend-powered export with authentication
+- [x] Export count preview
+
+### User Interface
+- [x] Modern responsive web portal
+- [x] Incident list with pagination and filtering
+- [x] Incident details view with timeline
+- [x] Multi-select with checkboxes for bulk operations
+- [x] Real-time search and filtering
+- [x] Status and severity badge components
+
+### Security & Authentication
+- [x] JWT-based authentication
+- [x] Secure token management
+- [x] API request authentication
+
+---
+
+## 🚧 In Progress / Planned Features
+
+### Phase 1: Core Platform Enhancement (Q1 2026)
+
+#### Multi-Tenancy & Organization Support
+- [ ] Account hierarchy (Account → Organization → Project)
+- [ ] Tenant isolation at database level
+- [ ] Cross-tenant incident visibility controls
+- [ ] Organization-level settings and configurations
+- [ ] Team-based access control within organizations
+- [ ] Resource quotas per tenant
+
+#### User Management & Personas
+- [ ] Role-based access control (RBAC)
+  - [ ] Admin persona (platform administration)
+  - [ ] Incident Commander persona
+  - [ ] Responder persona
+  - [ ] Observer/Viewer persona
+  - [ ] Reporter persona (create only)
+- [ ] User profile management
+- [ ] Team assignments and hierarchies
+- [ ] On-call rotation management
+- [ ] User activity tracking and dashboards
+
+#### Advanced Incident Management
+- [ ] Custom incident fields (user-defined metadata)
+- [ ] Incident templates for quick creation
+- [ ] Incident linking and dependencies
+- [ ] Parent-child incident relationships
+- [ ] Incident merging for duplicate handling
+- [ ] Post-mortem/RCA document generation
+- [ ] Incident duration and SLA tracking
+- [ ] Auto-escalation based on severity and time
+
+### Phase 2: Integration & Automation (Q2 2026)
+
+#### Alerting System Integration
+- [ ] **AlertManager integration**
+  - [ ] Webhook receiver for AlertManager alerts
+  - [ ] Alert grouping and deduplication
+  - [ ] Auto-create incidents from critical alerts
+  - [ ] Bi-directional sync (resolve alerts when incident closes)
+  - [ ] Alert metadata mapping to incident fields
+- [ ] Prometheus integration for metrics
+- [ ] Grafana annotation support
+- [ ] PagerDuty integration
+- [ ] Opsgenie integration
+- [ ] Custom webhook support for generic alerting systems
+
+#### Communication & Collaboration
+- [ ] HTTP(S) mode support for RespondNow Slack app
+- [ ] Timelines in Slack for incident updates
+- [ ] Slack thread support in incident channel for comments
+- [ ] Microsoft Teams integration
+- [ ] Zoom meeting integration
+  - [ ] Auto-create war rooms
+  - [ ] Meeting recording links in incident
+- [ ] Email notifications for incident events
+- [ ] SMS/Phone alert integration (Twilio)
+- [ ] In-app notifications and bell icon
+
+#### Workflow Automation
+- [ ] OOTB (out-of-the-box) runbooks for incident lifecycle events
+- [ ] Playbook execution from UI
+- [ ] Auto-assignment rules based on criteria
+- [ ] Scheduled tasks and reminders
+- [ ] Custom webhooks on incident events
+- [ ] Integration with CI/CD systems
+- [ ] Automated status transitions based on conditions
+
+### Phase 3: Advanced Features (Q3 2026)
+
+#### Attachments & Artifacts
+- [ ] Support for attachment objects in incidents
+- [ ] File upload (logs, screenshots, configs)
+- [ ] S3/cloud storage integration
+- [ ] Inline image preview
+- [ ] Link external artifacts (Runbooks, Dashboards)
+- [ ] Version tracking for attached documents
+
+#### Analytics & Reporting
+- [ ] Incident metrics dashboard
+  - [ ] MTTD (Mean Time To Detect)
+  - [ ] MTTA (Mean Time To Acknowledge)
+  - [ ] MTTR (Mean Time To Resolve)
+  - [ ] Incident frequency by type/severity
+- [ ] Custom report builder
+- [ ] Scheduled report delivery
+- [ ] Incident trends and patterns
+- [ ] Team performance metrics
+- [ ] SLA compliance reporting
+- [ ] Export to data warehouses (BigQuery, Snowflake)
+
+#### Enhanced User Experience
+- [ ] Reminder/notification functionality for open incidents
+- [ ] History/context support in incident update modals
+- [ ] Bulk update operations
+- [ ] Keyboard shortcuts
+- [ ] Dark mode support
+- [ ] Mobile app (iOS/Android)
+- [ ] Offline mode support
+- [ ] Real-time collaborative editing
+
+### Phase 4: Enterprise & Scale (Q4 2026)
+
+#### Monitoring & Observability Integration
+- [ ] Datadog integration
+- [ ] New Relic integration
+- [ ] Splunk integration
+- [ ] Elastic/ELK stack integration
+- [ ] AWS CloudWatch integration
+- [ ] Azure Monitor integration
+- [ ] Google Cloud Monitoring integration
+
+#### Advanced Configuration
+- [ ] Ability to extend incident types
+- [ ] Custom severity levels configuration
+- [ ] Custom incident statuses and workflows
+- [ ] User-defined roles for team members
+- [ ] Custom fields and forms
+- [ ] Incident lifecycle customization
+
+#### High Availability & Performance
+- [ ] Read replicas for scaling
+- [ ] Caching layer (Redis)
+- [ ] Rate limiting and throttling
+- [ ] Multi-region deployment support
+- [ ] Disaster recovery procedures
+- [ ] Database backup and restore automation
+- [ ] Performance monitoring and optimization
+
+#### Security & Compliance
+- [ ] SSO/SAML integration
+- [ ] OAuth 2.0 support
+- [ ] API key management
+- [ ] Audit log export
+- [ ] GDPR compliance features
+- [ ] SOC 2 compliance
+- [ ] IP whitelisting
+- [ ] Field-level encryption
+- [ ] PII data masking
+
+### Phase 5: AI & Intelligence (2027)
+
+#### Intelligent Features
+- [ ] AI-powered incident classification
+- [ ] Anomaly detection for incident patterns
+- [ ] Smart incident routing and assignment
+- [ ] Auto-suggest similar past incidents
+- [ ] Predictive analytics for incident forecasting
+- [ ] NLP for incident description parsing
+- [ ] Chatbot for incident queries
+- [ ] Auto-generate runbooks from incident history
+
+#### Knowledge Management
+- [ ] Incident knowledge base
+- [ ] Auto-create KB articles from incidents
+- [ ] Search across historical incidents
+- [ ] Related incident suggestions
+- [ ] Solution recommendation engine
+- [ ] Community contributions for solutions
+
+---
+
+## 🔧 Technical Debt & Infrastructure
+
+- [ ] Migrate to microservices architecture
+- [ ] GraphQL API alongside REST
+- [ ] Event-driven architecture with message queues
+- [ ] Comprehensive API documentation (OpenAPI/Swagger)
+- [ ] SDK/Client libraries (Python, Go, Node.js)
+- [ ] Terraform modules for deployment
+- [ ] Helm charts for Kubernetes deployment
+- [ ] Load testing and performance benchmarking
+- [ ] Comprehensive E2E test coverage
+- [ ] Security scanning and vulnerability management
+
+---
+
+## 📝 Documentation & Developer Experience
+
+- [ ] Developer documentation portal
+- [ ] API playground
+- [ ] Integration guides and tutorials
+- [ ] Video tutorials and demos
+- [ ] Community forum
+- [ ] Contributing guidelines
+- [ ] Plugin/extension architecture
+- [ ] Webhook documentation
+- [ ] Best practices guide
+
+---
+
+## 🌟 Community & Ecosystem
+
+- [ ] Open source community edition
+- [ ] Plugin marketplace
+- [ ] Third-party integrations directory
+- [ ] Community-contributed playbooks
+- [ ] Public roadmap with voting
+- [ ] Bug bounty program
+- [ ] User conference/webinars
+
+---
+
+## 📊 Success Metrics
+
+- Time to detect incidents (MTTD)
+- Time to acknowledge incidents (MTTA)
+- Time to resolve incidents (MTTR)
+- User adoption rate
+- Integration usage statistics
+- API call volume and reliability
+- System uptime and availability
+- User satisfaction scores
