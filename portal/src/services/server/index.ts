@@ -62,3 +62,47 @@ export type { Timeline } from './schemas/Timeline';
 export type { UserDetails } from './schemas/UserDetails';
 export type { UserIdentifiers } from './schemas/UserIdentifiers';
 export type { UserMappingData } from './schemas/UserMappingData';
+
+// Incident mutation hooks
+export type {
+  CreateIncidentRequestBody,
+  CreateIncidentQueryParams,
+  CreateIncidentOkResponse,
+  CreateIncidentErrorResponse,
+  CreateIncidentProps
+} from './hooks/useCreateIncidentMutation';
+export { createIncident, useCreateIncidentMutation } from './hooks/useCreateIncidentMutation';
+
+export type {
+  DeleteIncidentQueryParams,
+  DeleteIncidentOkResponse,
+  DeleteIncidentErrorResponse,
+  DeleteIncidentProps
+} from './hooks/useDeleteIncidentMutation';
+export { deleteIncident, useDeleteIncidentMutation } from './hooks/useDeleteIncidentMutation';
+
+export type {
+  AcknowledgeIncidentQueryParams,
+  AcknowledgeIncidentOkResponse,
+  AcknowledgeIncidentErrorResponse,
+  AcknowledgeIncidentProps
+} from './hooks/useAcknowledgeIncidentMutation';
+export { acknowledgeIncident, useAcknowledgeIncidentMutation } from './hooks/useAcknowledgeIncidentMutation';
+
+export type {
+  UpdateIncidentStatusRequestBody,
+  UpdateIncidentStatusQueryParams,
+  UpdateIncidentStatusOkResponse,
+  UpdateIncidentStatusErrorResponse,
+  UpdateIncidentStatusProps
+} from './hooks/useUpdateIncidentStatusMutation';
+export { updateIncidentStatus, useUpdateIncidentStatusMutation } from './hooks/useUpdateIncidentStatusMutation';
+
+export type {
+  UpdateIncidentSeverityRequestBody,
+  UpdateIncidentSeverityQueryParams,
+  UpdateIncidentSeverityOkResponse,
+  UpdateIncidentSeverityErrorResponse,
+  UpdateIncidentSeverityProps
+} from './hooks/useUpdateIncidentSeverityMutation';
+export { updateIncidentSeverity, useUpdateIncidentSeverityMutation } from './hooks/useUpdateIncidentSeverityMutation';

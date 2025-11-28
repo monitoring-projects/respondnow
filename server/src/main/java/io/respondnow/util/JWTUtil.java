@@ -63,4 +63,22 @@ public class JWTUtil {
 
     return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
   }
+
+  // Extract userId from JWT token
+  public String getUserIdFromToken(String token) {
+    Claims claims = getClaimsFromToken(token);
+    return claims.get("username", String.class);
+  }
+
+  // Extract email from JWT token
+  public String getEmailFromToken(String token) {
+    Claims claims = getClaimsFromToken(token);
+    return claims.get("email", String.class);
+  }
+
+  // Extract name from JWT token
+  public String getNameFromToken(String token) {
+    Claims claims = getClaimsFromToken(token);
+    return claims.get("name", String.class);
+  }
 }

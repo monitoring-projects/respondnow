@@ -46,4 +46,8 @@ public interface IncidentService {
       throws Exception;
 
   Incident addComment(String incidentID, String comment, UserDetails currentUser) throws Exception;
+
+  Incident deleteIncident(String incidentID, UserDetails currentUser) throws Exception;
+
+  Incident acknowledgeIncident(String incidentID, UserDetails currentUser) throws Exception;
 }
