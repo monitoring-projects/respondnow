@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useToaster } from '@harnessio/uicore';
+import { useQueryClient } from '@tanstack/react-query';
 import { isEqual } from 'lodash-es';
 import IncidentsView from '@views/Incidents';
 import { getScope, scopeExists } from '@utils';
 import { initialIncidenrsFilterState, useIncidentsFilter, usePagination } from '@hooks';
 import { IncidentsTableProps } from '@interfaces';
 import { useListIncidentsQuery } from '@services/server';
+import { CreateIncidentModal } from '@components/CreateIncidentModal';
 import {
   FilterProps,
   IncidentsSearchBar,
@@ -15,6 +17,8 @@ import {
 } from './IncidentsFilters';
 
 const IncidentsController: React.FC = () => {
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const queryClient = useQueryClient();
   const scope = getScope();
   const { showError } = useToaster();
   // Filter props
@@ -67,15 +71,27 @@ const IncidentsController: React.FC = () => {
 
   const areFiltersSet = !isEqual(state, initialIncidenrsFilterState);
 
+  const handleCreateSuccess = () => {
+    queryClient.invalidateQueries(['listIncidents']);
+  };
+
   return (
-    <IncidentsView
-      tableData={tableData}
-      incidentsSearchBar={<IncidentsSearchBar {...filterProps} />}
-      incidentsStatusFilter={<IncidentsStatusFilter {...filterProps} />}
-      incidentsSeverityFilter={<IncidentsSeverityFilter {...filterProps} />}
-      resetFiltersButton={<ResetFilterButton {...filterProps} />}
-      areFiltersSet={areFiltersSet}
-    />
+    <>
+      <IncidentsView
+        tableData={tableData}
+        incidentsSearchBar={<IncidentsSearchBar {...filterProps} />}
+        incidentsStatusFilter={<IncidentsStatusFilter {...filterProps} />}
+        incidentsSeverityFilter={<IncidentsSeverityFilter {...filterProps} />}
+        resetFiltersButton={<ResetFilterButton {...filterProps} />}
+        areFiltersSet={areFiltersSet}
+        onCreateIncident={() => setIsCreateModalOpen(true)}
+      />
+      <CreateIncidentModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+    </>
   );
 };
 

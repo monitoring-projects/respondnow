@@ -584,4 +584,45 @@ public class IncidentServiceImpl implements IncidentService {
     // Convert createdAt (long) to String and concatenate with a new UUID
     return createdAt + "-" + UUID.randomUUID();
   }
+
+  @Transactional
+  public Incident deleteIncident(String incidentID, UserDetails currentUser) throws Exception {
+    // Step 1: Retrieve the existing incident by its ID
+    Optional<Incident> existingIncident = incidentRepository.findByIdentifier(incidentID);
+    if (existingIncident.isEmpty()) {
+      throw new IncidentNotFoundException("Incident not found with ID: " + incidentID);
+    }
+
+    Incident incident = existingIncident.get();
+
+    // Get the current timestamp (in Unix time)
+    long ts = Instant.now().getEpochSecond();
+
+    // Update the audit details with the current user and timestamp
+    incident.setUpdatedBy(currentUser);
+    incident.setUpdatedAt(ts);
+    incident.setRemoved(true);
+    incident.setRemovedAt(ts);
+    incident.setActive(false);
+
+    // Create a new timeline entry for the deletion
+    Timeline timeline = new Timeline();
+    timeline.setId(String.valueOf(ts));
+    timeline.setType(ChangeType.Incident_Deleted);
+    timeline.setCreatedAt(ts);
+    timeline.setUpdatedAt(ts);
+    timeline.setUserDetails(currentUser);
+    timeline.setPreviousState("active");
+    timeline.setCurrentState("deleted");
+    timeline.setMessage("Incident deleted");
+
+    incident.addTimeline(timeline);
+
+    return incidentRepository.save(incident);
+  }
+
+  @Transactional
+  public Incident acknowledgeIncident(String incidentID, UserDetails currentUser) throws Exception {
+    return updateStatus(incidentID, Status.Acknowledged, currentUser);
+  }
 }

@@ -8,12 +8,15 @@ import io.respondnow.model.incident.Incident;
 import java.util.List;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Setter
+@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Builder
+@SuperBuilder
 public class ListResponseDTO extends DefaultResponseDTO {
 
   @JsonProperty("data")

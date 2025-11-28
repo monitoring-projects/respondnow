@@ -26,15 +26,42 @@ RespondNow is an open-source incident management platform that integrates seamle
    - **Tech Stack:** Java, Spring Boot, MongoDB
    - **Responsibilities:** Handle business logic, data storage, and API endpoints for incident management.
    - **Key Classes and Methods:**
+     - [IncidentService](./../../../server/src/main/java/io/respondnow/service/incident/IncidentService.java): Interface defining incident lifecycle operations.
+     - [IncidentServiceImpl](./../../../server/src/main/java/io/respondnow/service/incident/IncidentServiceImpl.java): Implementation with methods for creating, updating, deleting, and acknowledging incidents.
+     - [IncidentController](./../../../server/src/main/java/io/respondnow/controller/IncidentController.java): REST controller exposing incident management API endpoints.
+     - [IncidentRepository](./../../../server/src/main/java/io/respondnow/repository/IncidentRepository.java): MongoDB repository for incident data.
      - [ProjectService](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java): Interface defining project-related operations.
-     - [ProjectServiceImpl](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectServiceImpl.java): Implementation of [ProjectService](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java) with methods like [createProject](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java), [createProjectWithRetry](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java), [deleteProject](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java), etc.
+     - [ProjectServiceImpl](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectServiceImpl.java): Implementation of ProjectService.
      - [ProjectRepository](./../../../server/src/main/java/io/respondnow/repository/ProjectRepository.java): MongoDB repository for project data.
+   - **Incident API Endpoints:**
+     - `POST /api/incident` - Create a new incident
+     - `GET /api/incident/{id}` - Get incident details
+     - `GET /api/incidents` - List incidents with filtering and pagination
+     - `DELETE /api/incident/{id}` - Soft delete an incident
+     - `PUT /api/incident/{id}/acknowledge` - Acknowledge an incident
+     - `PUT /api/incident/{id}/status` - Update incident status
+     - `PUT /api/incident/{id}/severity` - Update incident severity
+     - `PUT /api/incident/{id}/summary` - Update incident summary
+     - `POST /api/incident/{id}/comment` - Add comment to incident timeline
 
 2. **Frontend Portal:**
-   - **Tech Stack:** React, TypeScript, Webpack
+   - **Tech Stack:** React, TypeScript, Webpack, TanStack Query
    - **Responsibilities:** Provide a web-based dashboard for monitoring and managing incidents.
    - **Key Components:**
-     - `GettingStartedView`, `IncidentDetailsView`, `SideNav`, `StatusBadge`, etc.
+     - `IncidentsView` - Dashboard displaying incident list with filters and search
+     - `IncidentDetailsView` - Detailed view of a single incident with timeline
+     - `CreateIncidentModal` - Modal form for creating new incidents
+     - `IncidentActions` - Action buttons for acknowledge, status update, and delete
+     - `SeverityBadge`, `StatusBadge` - Visual indicators for incident severity and status
+     - `SideNav` - Navigation component
+   - **API Hooks:**
+     - `useListIncidentsQuery` - Fetch paginated incident list
+     - `useGetIncidentQuery` - Fetch single incident details
+     - `useCreateIncidentMutation` - Create new incident
+     - `useDeleteIncidentMutation` - Delete incident
+     - `useAcknowledgeIncidentMutation` - Acknowledge incident
+     - `useUpdateIncidentStatusMutation` - Update incident status
+     - `useUpdateIncidentSeverityMutation` - Update incident severity
 
 3. **Slack App:**
    - **Responsibilities:** Allow users to perform incident management tasks directly from Slack.
@@ -78,17 +105,45 @@ RespondNow is an open-source incident management platform that integrates seamle
 
 **Key Processes and Workflows:**
 
-1. **Project Creation:**
-   - Method: `ProjectServiceImpl.createProject` and [createProjectWithRetry](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectService.java).
-   - Workflow: Validate project existence -> Save to repository -> Handle retries if necessary.
+1. **Incident Lifecycle Management:**
 
-2. **Project Deletion:**
-   - Method: `ProjectServiceImpl.deleteProject`.
-   - Workflow: Fetch project by identifier -> Soft delete by setting `removed` flag -> Save changes.
+   - **Create Incident:**
+     - Method: `IncidentServiceImpl.createIncident`
+     - Workflow: Validate input -> Create incident record -> Add timeline entry -> Optionally create Slack channel -> Save to repository
 
-3. **Project Retrieval:**
-   - Methods: `ProjectServiceImpl.findById`, [getAllProjects](./../../../server/src/main/java/io/respondnow/service/hierarchy/ProjectServiceImpl.java).
-   - Workflow: Fetch from repository -> Return project data.
+   - **Acknowledge Incident:**
+     - Method: `IncidentServiceImpl.acknowledgeIncident`
+     - Workflow: Fetch incident -> Update status to "Acknowledged" -> Add timeline entry -> Save changes
+
+   - **Update Incident Status:**
+     - Method: `IncidentServiceImpl.updateStatus`
+     - Workflow: Fetch incident -> Validate status transition -> Update status -> Add timeline entry -> Save changes
+     - Supported statuses: `Started`, `Acknowledged`, `Investigating`, `Identified`, `Mitigated`, `Resolved`
+
+   - **Update Incident Severity:**
+     - Method: `IncidentServiceImpl.updateSeverity`
+     - Workflow: Fetch incident -> Update severity -> Add timeline entry -> Save changes
+     - Supported severities: `SEV0` (Critical), `SEV1` (Major), `SEV2` (Minor)
+
+   - **Delete Incident:**
+     - Method: `IncidentServiceImpl.deleteIncident`
+     - Workflow: Fetch incident -> Soft delete by setting `removed` flag -> Add timeline entry -> Save changes
+
+   - **Add Comment:**
+     - Method: `IncidentServiceImpl.addComment`
+     - Workflow: Fetch incident -> Add comment to timeline -> Save changes
+
+2. **Project Management:**
+   - **Create Project:** `ProjectServiceImpl.createProject` - Validate existence -> Save to repository
+   - **Delete Project:** `ProjectServiceImpl.deleteProject` - Soft delete by setting `removed` flag
+   - **Retrieve Projects:** `ProjectServiceImpl.findById`, `getAllProjects`
+
+3. **Timeline Tracking:**
+   - All incident changes are recorded in a timeline with:
+     - Change type (Status, Severity, Comment, etc.)
+     - Previous and current state
+     - User who made the change
+     - Timestamp
 
 4. **Deployment:**
    - Docker: Multi-stage Dockerfile to build and run the application.
@@ -105,6 +160,7 @@ RespondNow is an open-source incident management platform that integrates seamle
 
 - **Milestones:**
   - **Release 0.1.0:** Initial cut of the platform with core features and Slack integration.
+  - **Release 0.2.0:** Full incident lifecycle management (create, acknowledge, update, delete) via web portal.
   - **Subsequent Releases:** Incremental improvements, bug fixes, and feature additions based on community feedback and internal roadmap.
 
 - **Deployment Schedule:**

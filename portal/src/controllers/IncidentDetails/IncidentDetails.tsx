@@ -1,5 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import IncidentDetailsView from '@views/IncidentDetails';
 import { useGetIncidentQuery } from '@services/server';
 import { IncidentDetailsPathProps } from '@routes/RouteDefinitions';
@@ -7,6 +8,7 @@ import { getScope, scopeExists } from '@utils';
 
 const IncidentDetailsController: React.FC = () => {
   const scope = getScope();
+  const queryClient = useQueryClient();
   const { incidentId } = useParams<IncidentDetailsPathProps>();
 
   const { data: incidentData, isLoading: incidentDataLoading } = useGetIncidentQuery(
@@ -19,7 +21,17 @@ const IncidentDetailsController: React.FC = () => {
     }
   );
 
-  return <IncidentDetailsView incidentData={incidentData?.data} incidentDataLoading={incidentDataLoading} />;
+  const handleActionComplete = () => {
+    queryClient.invalidateQueries(['getIncident']);
+  };
+
+  return (
+    <IncidentDetailsView
+      incidentData={incidentData?.data}
+      incidentDataLoading={incidentDataLoading}
+      onActionComplete={handleActionComplete}
+    />
+  );
 };
 
 export default IncidentDetailsController;

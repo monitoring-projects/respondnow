@@ -10,7 +10,9 @@ public enum ChangeType {
   Summary("Summary"),
   Roles("Roles"),
   Slack_Channel_Created("Slack_Channel_Created"),
-  Incident_Created("Incident_Created");
+  Incident_Created("Incident_Created"),
+  Incident_Deleted("Incident_Deleted"),
+  Incident_Acknowledged("Incident_Acknowledged");
 
   // Getter method to retrieve the value
   private final String value; // Declare the 'value' field

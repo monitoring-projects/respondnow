@@ -12,6 +12,7 @@ interface IncidentsViewProps {
   incidentsSeverityFilter: React.JSX.Element;
   resetFiltersButton: React.JSX.Element;
   areFiltersSet: boolean;
+  onCreateIncident?: () => void;
 }
 
 const IncidentsView: React.FC<IncidentsViewProps> = props => {
@@ -21,19 +22,27 @@ const IncidentsView: React.FC<IncidentsViewProps> = props => {
     incidentsStatusFilter,
     incidentsSeverityFilter,
     areFiltersSet,
-    resetFiltersButton
+    resetFiltersButton,
+    onCreateIncident
   } = props;
   const { getString } = useStrings();
 
   const isDataPresent = !!tableData.content.length;
 
-  const reportIncidentButton = <Button disabled variation={ButtonVariation.PRIMARY} text="Report Incident on Slack" />;
+  const createIncidentButton = (
+    <Button
+      variation={ButtonVariation.PRIMARY}
+      text="Create Incident"
+      icon="plus"
+      onClick={onCreateIncident}
+    />
+  );
 
   return (
     <DefaultLayout
       loading={tableData.isLoading}
       title={getString('incidents')}
-      toolbar={reportIncidentButton}
+      toolbar={createIncidentButton}
       subHeader={
         <>
           <Layout.Horizontal flex={{ alignItems: 'center', justifyContent: 'flex-start' }} spacing="medium">
@@ -57,7 +66,7 @@ const IncidentsView: React.FC<IncidentsViewProps> = props => {
           : {
               title: getString('noIncidentsFound'),
               subtitle: getString('noIncidentsFoundDescription'),
-              ctaButton: reportIncidentButton
+              ctaButton: createIncidentButton
             })
       }}
     >
