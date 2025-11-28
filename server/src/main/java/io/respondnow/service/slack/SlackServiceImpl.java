@@ -59,10 +59,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
 @Slf4j
+@ConditionalOnProperty(name = "slack.enabled", havingValue = "true")
 public class SlackServiceImpl implements SlackService {
   private static final Logger logger = LoggerFactory.getLogger(SlackServiceImpl.class);
   private final Slack slackClient;
