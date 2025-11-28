@@ -15,7 +15,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Use a multi-arch compatible OpenJDK 11 JRE Slim image
-FROM openjdk:11-jre-slim
+FROM openjdk:11.0.11-jre-slim
 
 # Set the working directory inside the container
 WORKDIR /app
