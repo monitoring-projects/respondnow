@@ -32,7 +32,7 @@ const IncidentDetailsView: React.FC<IncidentDetailsViewProps> = props => {
     },
     {
       onSuccess: (blob) => {
-        const filename = `incident_${incidentData?.identifier}_${new Date().toISOString().split('T')[0]}.txt`;
+        const filename = `incident_${incidentData?.identifier}_${new Date().toISOString().split('T')[0]}.pdf`;
         downloadBlob(blob, filename);
         showSuccess('Incident exported to PDF');
       },

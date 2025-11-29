@@ -3,13 +3,19 @@ package io.respondnow.service.export;
 import io.respondnow.model.incident.Incident;
 import io.respondnow.model.incident.Role;
 import io.respondnow.model.incident.Timeline;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
+import org.springframework.stereotype.Service;
+
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.stereotype.Service;
 
 @Service
 public class ExportServiceImpl implements ExportService {
@@ -50,77 +56,128 @@ public class ExportServiceImpl implements ExportService {
 
   @Override
   public byte[] exportToPDF(Incident incident) {
-    // Simple text-based PDF generation
-    // For production, consider using Apache PDFBox or iText
-    StringBuilder content = new StringBuilder();
-    
-    content.append("INCIDENT REPORT\n");
-    content.append("===============\n\n");
-    content.append("Generated: ").append(DATE_FORMATTER.format(Instant.now())).append("\n\n");
-    
-    content.append("INCIDENT DETAILS\n");
-    content.append("----------------\n");
-    content.append("ID: ").append(nullSafe(incident.getIdentifier())).append("\n");
-    content.append("Name: ").append(nullSafe(incident.getName())).append("\n");
-    content.append("Severity: ").append(incident.getSeverity() != null ? incident.getSeverity().toString() : "N/A").append("\n");
-    content.append("Status: ").append(incident.getStatus() != null ? incident.getStatus().toString() : "N/A").append("\n");
-    content.append("Type: ").append(incident.getType() != null ? incident.getType().toString() : "N/A").append("\n");
-    content.append("Summary: ").append(nullSafe(incident.getSummary())).append("\n");
-    content.append("Description: ").append(nullSafe(incident.getDescription())).append("\n");
-    content.append("Created By: ").append(getCreatedByName(incident)).append("\n");
-    content.append("Created At: ").append(formatTimestamp(incident.getCreatedAt())).append("\n");
-    content.append("Updated At: ").append(formatTimestamp(incident.getUpdatedAt())).append("\n");
-    content.append("Incident URL: ").append(nullSafe(incident.getIncidentUrl())).append("\n");
-    content.append("Tags: ").append(formatTags(incident.getTags())).append("\n");
-    content.append("Duration: ").append(calculateDuration(incident)).append(" minutes\n\n");
-
-    // Key Members
-    if (incident.getRoles() != null && !incident.getRoles().isEmpty()) {
-      content.append("KEY MEMBERS\n");
-      content.append("-----------\n");
-      for (Role role : incident.getRoles()) {
-        String memberName = role.getUserDetails() != null 
-            ? (role.getUserDetails().getName() != null ? role.getUserDetails().getName() : role.getUserDetails().getUserName())
-            : "Unknown";
-        content.append("- ").append(memberName).append(" (").append(role.getRoleType()).append(")\n");
+    try (PDDocument document = new PDDocument()) {
+      PDPage page = new PDPage(PDRectangle.A4);
+      document.addPage(page);
+      
+      try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+        float margin = 50;
+        float yPosition = page.getMediaBox().getHeight() - margin;
+        float fontSize = 12;
+        float leading = 1.5f * fontSize;
+        
+        // Title
+        contentStream.setFont(PDType1Font.HELVETICA_BOLD, 16);
+        contentStream.beginText();
+        contentStream.newLineAtOffset(margin, yPosition);
+        contentStream.showText("INCIDENT DETAILS");
+        contentStream.endText();
+        yPosition -= leading * 2;
+        
+        // Content
+        contentStream.setFont(PDType1Font.HELVETICA, fontSize);
+        
+        yPosition = writeTextLine(contentStream, "ID: " + nullSafe(incident.getIdentifier()), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Name: " + nullSafe(incident.getName()), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Severity: " + (incident.getSeverity() != null ? incident.getSeverity().toString() : "N/A"), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Status: " + (incident.getStatus() != null ? incident.getStatus().toString() : "N/A"), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Type: " + (incident.getType() != null ? incident.getType().toString() : "N/A"), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Summary: " + nullSafe(incident.getSummary()), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Created By: " + getCreatedByName(incident), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Created At: " + formatTimestamp(incident.getCreatedAt()), margin, yPosition, leading);
+        yPosition = writeTextLine(contentStream, "Duration: " + calculateDuration(incident) + " minutes", margin, yPosition, leading);
+        
+        yPosition -= leading;
+        
+        // Key Members
+        if (incident.getRoles() != null && !incident.getRoles().isEmpty()) {
+          contentStream.setFont(PDType1Font.HELVETICA_BOLD, fontSize);
+          yPosition = writeTextLine(contentStream, "KEY MEMBERS:", margin, yPosition, leading);
+          contentStream.setFont(PDType1Font.HELVETICA, fontSize);
+          
+          for (Role role : incident.getRoles()) {
+            String memberName = role.getUserDetails() != null 
+                ? (role.getUserDetails().getName() != null ? role.getUserDetails().getName() : role.getUserDetails().getUserName())
+                : "Unknown";
+            yPosition = writeTextLine(contentStream, "  - " + memberName + " (" + role.getRoleType() + ")", margin, yPosition, leading);
+          }
+          yPosition -= leading;
+        }
+        
+        // Timeline
+        if (incident.getTimelines() != null && !incident.getTimelines().isEmpty()) {
+          contentStream.setFont(PDType1Font.HELVETICA_BOLD, fontSize);
+          yPosition = writeTextLine(contentStream, "TIMELINE:", margin, yPosition, leading);
+          contentStream.setFont(PDType1Font.HELVETICA, fontSize);
+          
+          int count = 0;
+          for (Timeline timeline : incident.getTimelines()) {
+            if (count >= 10) break; // Limit to first 10 timeline entries to fit on page
+            String time = formatTimestamp(timeline.getCreatedAt());
+            String type = timeline.getType() != null ? timeline.getType().toString().replace("_", " ") : "Event";
+            yPosition = writeTextLine(contentStream, "  " + time + " - " + type, margin, yPosition, leading);
+            count++;
+          }
+        }
       }
-      content.append("\n");
+      
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      document.save(baos);
+      return baos.toByteArray();
+      
+    } catch (IOException e) {
+      throw new RuntimeException("Error generating PDF", e);
     }
-
-    // Timeline
-    if (incident.getTimelines() != null && !incident.getTimelines().isEmpty()) {
-      content.append("TIMELINE\n");
-      content.append("--------\n");
-      for (Timeline timeline : incident.getTimelines()) {
-        String time = formatTimestamp(timeline.getCreatedAt());
-        String type = timeline.getType() != null ? timeline.getType().toString().replace("_", " ") : "Event";
-        String user = timeline.getUserDetails() != null 
-            ? (timeline.getUserDetails().getName() != null ? timeline.getUserDetails().getName() : "System")
-            : "System";
-        content.append(time).append(" - ").append(type).append(" by ").append(user).append("\n");
-      }
-    }
-
-    return content.toString().getBytes();
+  }
+  
+  private float writeTextLine(PDPageContentStream contentStream, String text, float x, float y, float leading) throws IOException {
+    contentStream.beginText();
+    contentStream.newLineAtOffset(x, y);
+    contentStream.showText(text);
+    contentStream.endText();
+    return y - leading;
   }
 
   @Override
   public byte[] exportToPDF(List<Incident> incidents) {
-    StringBuilder content = new StringBuilder();
-    
-    content.append("INCIDENTS REPORT\n");
-    content.append("================\n\n");
-    content.append("Generated: ").append(DATE_FORMATTER.format(Instant.now())).append("\n");
-    content.append("Total Incidents: ").append(incidents.size()).append("\n\n");
-
-    for (int i = 0; i < incidents.size(); i++) {
-      Incident incident = incidents.get(i);
-      content.append("--- Incident ").append(i + 1).append(" of ").append(incidents.size()).append(" ---\n\n");
-      content.append(new String(exportToPDF(incident)));
-      content.append("\n\n");
+    try (PDDocument document = new PDDocument()) {
+      float margin = 50;
+      float fontSize = 10;
+      float leading = 1.5f * fontSize;
+      
+      for (int i = 0; i < incidents.size(); i++) {
+        PDPage page = new PDPage(PDRectangle.A4);
+        document.addPage(page);
+        Incident incident = incidents.get(i);
+        
+        try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+          float yPosition = page.getMediaBox().getHeight() - margin;
+          
+          // Page header
+          contentStream.setFont(PDType1Font.HELVETICA_BOLD, 14);
+          contentStream.beginText();
+          contentStream.newLineAtOffset(margin, yPosition);
+          contentStream.showText("Incident " + (i + 1) + " of " + incidents.size());
+          contentStream.endText();
+          yPosition -= leading * 2;
+          
+          // Incident details
+          contentStream.setFont(PDType1Font.HELVETICA, fontSize);
+          yPosition = writeTextLine(contentStream, "ID: " + nullSafe(incident.getIdentifier()), margin, yPosition, leading);
+          yPosition = writeTextLine(contentStream, "Name: " + nullSafe(incident.getName()), margin, yPosition, leading);
+          yPosition = writeTextLine(contentStream, "Severity: " + (incident.getSeverity() != null ? incident.getSeverity().toString() : "N/A"), margin, yPosition, leading);
+          yPosition = writeTextLine(contentStream, "Status: " + (incident.getStatus() != null ? incident.getStatus().toString() : "N/A"), margin, yPosition, leading);
+          yPosition = writeTextLine(contentStream, "Created At: " + formatTimestamp(incident.getCreatedAt()), margin, yPosition, leading);
+        }
+      }
+      
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      document.save(baos);
+      return baos.toByteArray();
+      
+    } catch (IOException e) {
+      throw new RuntimeException("Error generating PDF for incidents list", e);
     }
-
-    return content.toString().getBytes();
   }
 
   private String escapeCsvValue(String value) {
