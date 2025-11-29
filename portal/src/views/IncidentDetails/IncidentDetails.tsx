@@ -7,6 +7,7 @@ import { DefaultLayout } from '@layouts';
 import { Incident, useExportSinglePDFMutation, downloadBlob } from '@services/server';
 import { generateSlackChannelLink, getScope } from '@utils';
 import { IncidentActions } from '@components/IncidentActions';
+import Evidence from '@components/Evidence';
 import SlackIcon from '@images/slack-mono.svg';
 import DetailsSection from './sections/DetailsSection';
 import TimelineSection from './sections/Timeline';
@@ -101,10 +102,15 @@ const IncidentDetailsView: React.FC<IncidentDetailsViewProps> = props => {
         </Layout.Horizontal>
       }
     >
-      <Layout.Horizontal height="100%" spacing="large" background={Color.PRIMARY_BG}>
-        <DetailsSection incidentData={incidentData} />
-        <TimelineSection incidentData={incidentData} />
-      </Layout.Horizontal>
+      <Layout.Vertical spacing="large" background={Color.PRIMARY_BG}>
+        <Layout.Horizontal height="100%" spacing="large">
+          <DetailsSection incidentData={incidentData} />
+          <TimelineSection incidentData={incidentData} />
+        </Layout.Horizontal>
+        {incidentData?.id && incidentData?.identifier && (
+          <Evidence incidentId={incidentData.id} incidentIdentifier={incidentData.identifier} />
+        )}
+      </Layout.Vertical>
     </DefaultLayout>
   );
 };

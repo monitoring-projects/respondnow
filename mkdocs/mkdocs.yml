@@ -66,4 +66,5 @@ nav:
           - View Incident Details: user-guide/navigate-the-respondnow-portal/view-incident-details.md
   - Development:
       - PDF Export Implementation: development/PDF-Export-Implementation-Complete-E2E.md
+      - Evidence Management System Implementation: development/Evidence-Management-System-Complete-Implementation.md
   - Release Notes: release-notes/release-notes-tracker.md
