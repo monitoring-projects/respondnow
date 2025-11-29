@@ -89,21 +89,26 @@ public class ExportController {
           String accountIdentifier) {
     
     try {
-      Incident incident = incidentService.getIncidentById(incidentIdentifier);
+      Incident incident = incidentService.getIncidentByIdentifier(incidentIdentifier);
       if (incident == null) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
             .body("Incident not found".getBytes());
       }
       
       byte[] pdfContent = exportService.exportToPDF(incident);
-      String filename = generateFilename("incident_" + incidentIdentifier, "txt");
+      String filename = generateFilename("incident_" + incidentIdentifier, "pdf");
       
       HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.TEXT_PLAIN);
+      headers.setContentType(MediaType.APPLICATION_PDF);
       headers.setContentDispositionFormData("attachment", filename);
+      headers.set("X-Content-Type-Options", "nosniff");
       
       return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(("Invalid request: " + e.getMessage()).getBytes());
     } catch (Exception e) {
+      e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(("Error exporting incident: " + e.getMessage()).getBytes());
     }
@@ -136,16 +141,19 @@ public class ExportController {
     try {
       List<Incident> incidents = getIncidentsForExport(accountIdentifier, orgIdentifier, projectIdentifier, request);
       byte[] pdfContent = exportService.exportToPDF(incidents);
-      
-      String filename = generateFilename("incidents_report", "txt");
+      String filename = generateFilename("incidents_export", "pdf");
       
       HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.TEXT_PLAIN);
+      headers.setContentType(MediaType.APPLICATION_PDF);
       headers.setContentDispositionFormData("attachment", filename);
-      headers.set("X-Total-Count", String.valueOf(incidents.size()));
+      headers.set("X-Content-Type-Options", "nosniff");
       
       return new ResponseEntity<>(pdfContent, headers, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+          .body(("Invalid request: " + e.getMessage()).getBytes());
     } catch (Exception e) {
+      e.printStackTrace();
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
           .body(("Error exporting incidents: " + e.getMessage()).getBytes());
     }
